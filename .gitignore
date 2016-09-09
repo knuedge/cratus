@@ -1,6 +1,4 @@
-<<<<<<< HEAD
 cratus.sublime-project
-=======
 # Ignore Mac stuff
 .DS_Store
 
@@ -13,4 +11,3 @@ tmp/
 # Ignore doc files
 doc/
 .yardoc
->>>>>>> 52ce6a2719ab74d788ea87f9d077f17d5a45287d
