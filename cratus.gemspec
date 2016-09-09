@@ -1,11 +1,11 @@
 $LOAD_PATH.push File.expand_path('../lib', __FILE__)
-$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+$LOAD_PATH.unshift('lib') unless $LOAD_PATH.include?('lib')
 require 'cratus/version'
 
 Gem::Specification.new do |s|
   s.description = 'The Ruby tool for auditing and reporting on user permissions based on groups'
   s.name        = 'cratus'
-  s.version     = Cratus::VERSION.to_s
+  s.version     = Cratus.version
   s.date        = Time.now.strftime('%Y-%m-%d')
   s.summary     = 'Cratus queries LDAP for users and their memberships, then reports on it.'
   s.authors     = ['Jonathan Gnagy', 'Daniel Schaaff']
