@@ -38,7 +38,7 @@ module Cratus
                     else
                       fail "Invalid LDAP Scope!"
                     end
-      
+
       @@ldap_connection.search(
         base: options[:basedn],
         filter: filter,
