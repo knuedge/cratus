@@ -39,22 +39,23 @@ module Cratus
                       fail "Invalid LDAP Scope!"
                     end
 
-      @@ldap_connection.search(
+      results = @@ldap_connection.search(
         base: options[:basedn],
         filter: filter,
         scope: scope_class,
         attributes: [*attrs].map(&:to_s)
-      ).compact
+      )
+      results.nil? ? raise "Search Failed" : results.compact
     end
 
     # Validation Methods
 
     def self.validate_ldap_bound
-      raise "LDAP Not Connected" unless @@ldap_bound
+      raise "LDAP Not Connected" unless defined? @@ldap_bound
     end
 
     def self.validate_ldap_connection
-      raise "No LDAP Connection" unless @@ldap_connection
+      raise "No LDAP Connection" unless defined? @@ldap_connection
     end
 
     def self.validate_search_options(options)
