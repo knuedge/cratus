@@ -1,5 +1,9 @@
 module Cratus
   module LDAP
+    # Define the LDAP connection
+    # Note: does not actually connect (bind), just sets up the connection
+    #
+    # Required Options: :host, :port, :basedn, :username, :password
     def self.connection(options = {})
       validate_connection_options(options)
       @@ldap_connection ||= Net::LDAP.new(
@@ -14,12 +18,17 @@ module Cratus
       )
     end
 
+    # Actually connect (bind) to LDAP
     def self.connect
       validate_ldap_connection
       @@ldap_connection.bind
       @@ldap_bound = true
     end
 
+    # Perform an LDAP search
+    #
+    # Required Options: :basedn
+    # Optional Options: :attrs, :scope
     def self.search(filter, options = {})
       validate_ldap_connection
       validate_ldap_bound
@@ -45,7 +54,8 @@ module Cratus
         scope: scope_class,
         attributes: [*attrs].map(&:to_s)
       )
-      results.nil? ? raise "Search Failed" : results.compact
+      raise "Search Failed" if results.nil?
+      results.compact
     end
 
     # Validation Methods
