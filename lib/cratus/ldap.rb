@@ -2,24 +2,25 @@ module Cratus
   module LDAP
     # Define the LDAP connection
     # Note: does not actually connect (bind), just sets up the connection
-    #
-    # Required Options: :host, :port, :basedn, :username, :password
-    def self.connection(options = {})
-      validate_connection_options(options)
-      @@ldap_connection ||= Net::LDAP.new(
-        host: options[:host],
-        port: options[:port],
-        base: options[:basedn],
+    def self.connection
+      options = {
+        host: Cratus.config.host,
+        port: Cratus.config.port,
+        base: Cratus.config.basedn,
         auth: {
           method: :simple,
-          username: options[:username],
-          password: options[:password]
+          username: Cratus.config.username,
+          password: Cratus.config.password
         }
-      )
+      }
+      # TODO: make the validations do something useful
+      #validate_connection_options(options)
+      @@ldap_connection ||= Net::LDAP.new(options)
     end
 
     # Actually connect (bind) to LDAP
     def self.connect
+      connection
       validate_ldap_connection
       @@ldap_connection.bind
       @@ldap_bound = true

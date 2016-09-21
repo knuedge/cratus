@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.bindir      = 'bin'
   s.files       = [
     'lib/cratus.rb',
+    'lib/cratus/config.rb',
     'lib/cratus/group.rb',
     'lib/cratus/ldap.rb',
     'lib/cratus/user.rb',
