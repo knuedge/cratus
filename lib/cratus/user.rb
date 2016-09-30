@@ -56,6 +56,7 @@ module Cratus
 
     def self.ldap_return_attributes
       [
+        Cratus.config.user_dn_attribute.to_s,
         Cratus.config.user_department_attribute.to_s,
         Cratus.config.user_mail_attribute.to_s,
         Cratus.config.user_displayname_attribute.to_s,
