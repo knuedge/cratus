@@ -32,6 +32,8 @@ module Cratus
       end
     end
 
+    alias_method :groups, :member_of
+
     # All the LDAP Users
     def self.all
       raw_results = Cratus::LDAP.search(
@@ -40,7 +42,7 @@ module Cratus
         attrs: ldap_dn_attribute
       )
       raw_results.map do |entry|
-        self.new(entry[ldap_dn_attribute.to_sym].last, search_base)
+        self.new(entry[ldap_dn_attribute.to_sym].last)
       end
     end
 
