@@ -12,6 +12,7 @@ class Cratus::Config < OpenStruct
       group_description_attribute: :description,
       group_objectclass: :group,
       group_basedn: 'ou=groups,dc=example,dc=com',
+      group_memberof_attribute: :memberOf,
       user_dn_attribute: :samaccountname,
       user_objectclass: :user,
       user_basedn: 'ou=users,dc=example,dc=com',

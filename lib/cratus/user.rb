@@ -1,5 +1,6 @@
 module Cratus
   class User
+    include Comparable
     attr_reader :username, :search_base
 
     def initialize(username)
@@ -27,12 +28,22 @@ module Cratus
     def member_of
       memrof_attr = Cratus.config.user_memberof_attribute
       # TODO: move the search filter to a configurable param
-      @raw_ldap_data[memrof_attr].reject {|g| g.match /OU=Distribution Groups/ }.map do |raw_group|
+      raw_groups = @raw_ldap_data[memrof_attr].reject {|g| g.match /OU=Distribution Groups/ }
+      initial_groups = raw_groups.map do |raw_group|
         Group.new(raw_group.match(/^#{Group.ldap_dn_attribute.to_s.upcase}=([^,]+),/)[1])
       end
+      all_the_groups = initial_groups
+      initial_groups.each do |group|
+        all_the_groups.concat(group.member_of)
+      end
+      all_the_groups.uniq { |g| g.name }
     end
 
     alias_method :groups, :member_of
+
+    def <=>(other)
+      @username <=> other.username
+    end
 
     # All the LDAP Users
     def self.all

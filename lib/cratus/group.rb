@@ -1,5 +1,6 @@
 module Cratus
   class Group
+    include Comparable
     attr_reader :name, :search_base
 
     def initialize(name)
@@ -19,6 +20,27 @@ module Cratus
 
     def member_groups
       all_members[:groups]
+    end
+
+    def member_of
+      memrof_attr = Cratus.config.group_memberof_attribute
+
+      # TODO make this work with more things...
+      unless @raw_ldap_data
+        puts "WARNING: Group '#{@name}' appears to be invalid or beyond the search scope!"
+        return []
+      end
+
+      # TODO: move the search filter to a configurable param
+      raw_groups = @raw_ldap_data[memrof_attr].reject {|g| g.match /OU=Distribution Groups/ }
+      initial_groups = raw_groups.map do |raw_group|
+        Group.new(raw_group.match(/^#{Group.ldap_dn_attribute.to_s.upcase}=([^,]+),/)[1])
+      end
+      all_the_groups = initial_groups
+      initial_groups.each do |group|
+        all_the_groups.concat(group.member_of) # recursion!
+      end
+      all_the_groups.uniq { |g| g.name }
     end
 
     # LDAP description attribute
@@ -46,12 +68,17 @@ module Cratus
       [
         Cratus.config.group_dn_attribute.to_s,
         Cratus.config.group_member_attribute.to_s,
-        Cratus.config.group_description_attribute.to_s
+        Cratus.config.group_description_attribute.to_s,
+        Cratus.config.group_memberof_attribute.to_s
       ]
     end
 
     def self.ldap_search_base
       Cratus.config.group_basedn.to_s
+    end
+
+    def <=>(other)
+      @name <=> other.name
     end
 
     private
@@ -96,8 +123,8 @@ module Cratus
       end
 
       # deliver the results
-      results[:groups].uniq!
-      results[:users].uniq!
+      results[:groups].uniq! { |g| g.name }
+      results[:users].uniq!  { |u| u.username }
       return results
     end
   end
