@@ -27,7 +27,7 @@ module Cratus
 
       # TODO make this work with more things...
       unless @raw_ldap_data
-        puts "WARNING: Group '#{@name}' appears to be invalid or beyond the search scope!"
+        STDERR.puts "WARNING: Group '#{@name}' appears to be invalid or beyond the search scope!"
         return []
       end
 
