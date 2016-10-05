@@ -1,6 +1,8 @@
 # Standard Library
 require 'ostruct'
 require 'yaml'
+
+# External Requirements
 require 'net/ldap'
 
 # Internal Requirements

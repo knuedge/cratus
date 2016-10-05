@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
 
   # Dependencies
   s.add_runtime_dependency 'colorize',    '~> 0.7'
+  s.add_runtime_dependency 'net-ldap',    '~> 0.10'
 
   s.add_development_dependency 'rspec',   '~> 3.1'
   s.add_development_dependency 'rubocop', '~> 0.35'
