@@ -17,17 +17,14 @@ group_permissions =  YAML.load_file(group_mapping_file)
 
 # Gather group memberships and permissions
 @results = {} # stash all the results here... might get really big
-User.all.each do |user|
+User.all.sort.each do |user|
   key = user.username.to_s
   user_groups = user.member_of.map { |g| g.name.to_s }
 
-  @results[key] = { 'permissions' => [] }
-  @results[key]['groups'] = user_groups.sort
-  user_groups.each do |ugroup|
-    @results[key]['permissions'].concat(group_permissions[ugroup]) if group_permissions[ugroup]
+  @results[key] = {'groups' => {}}
+  user_groups.sort.each do |ugroup|
+    @results[key]['groups'][ugroup] = group_permissions[ugroup].sort if group_permissions[ugroup]
   end
-  @results[key]['permissions'].sort!
-  @results[key]['permissions'].uniq!
 end
 
 puts @results.to_yaml
