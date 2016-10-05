@@ -3,3 +3,31 @@
 require 'cratus'
 
 include Cratus
+
+LDAP.connect
+
+# Read in arguments
+group_mapping_arg = ARGV[0]
+raise "Missing Group Mapping Argument!" unless group_mapping_arg
+group_mapping_file = File.expand_path(group_mapping_arg)
+raise "Invalid Group Mapping File #{group_mapping_file}" unless File.readable?(group_mapping_file)
+
+# Load the YAML file(s) for mapping permissions
+group_permissions =  YAML.load_file(group_mapping_file)
+
+# Gather group memberships and permissions
+@results = {} # stash all the results here... might get really big
+User.all.each do |user|
+  key = user.username
+  user_groups = user.member_of.map { |g| g.name.to_s }
+
+  @results[key] = { 'permissions' => [] }
+  @results[key]['groups'] = user_groups.sort
+  user_groups.each do |ugroup|
+    @results[key]['permissions'].concat(group_permissions[ugroup]) if group_permissions[ugroup]
+  end
+  @results[key]['permissions'].sort!
+  @results[key]['permissions'].uniq!
+end
+
+puts @results.to_yaml
