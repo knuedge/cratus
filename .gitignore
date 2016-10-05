@@ -4,6 +4,7 @@ cratus.sublime-project
 
 # Ignore temporary stuff
 tmp/
+testing/
 
 # Ignore built gem files
 *.gem
@@ -11,3 +12,7 @@ tmp/
 # Ignore doc files
 doc/
 .yardoc
+
+
+# ignore sublime text project
+*.sublime-workspace
