@@ -51,10 +51,10 @@ else
   # Temporary files for a call to `diff`
   newdata = Tempfile.new('new')
   olddata = Tempfile.new('old')
-  
+
   # Add the results from our comparison to the first temp file
   newdata.write(results.to_yaml)
-  
+
   # Grab the old data and put it into a new hash for the call to `diff`
   oldhash = {}
   results.each do |user,data|
