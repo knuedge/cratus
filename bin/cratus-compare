@@ -43,11 +43,14 @@ if data1 == data2
   exit 0
 else
   STDERR.puts "Looks like things have changed!"
+
+  # Calculate what has actually changed
   differences = (data2.to_a - data1.to_a)
   results = {}
   differences.each do |user|
     results[user[0]] = user[1]
   end
+
   # Temporary files for a call to `diff`
   newdata = Tempfile.new('new')
   olddata = Tempfile.new('old')
@@ -55,7 +58,7 @@ else
   # Add the results from our comparison to the first temp file
   newdata.write(results.to_yaml)
 
-  # Grab the old data and put it into a new hash for the call to `diff`
+  # Grab the old data for just our changed users and put it into a new hash
   oldhash = {}
   results.each do |user,data|
     oldhash[user] = data1[user] if data1.key?(user)
