@@ -1,0 +1,78 @@
+#!/usr/bin/env ruby
+
+require 'yaml'
+require 'tempfile'
+
+# Used to compare the output of the `cratus` command across multiple runs
+
+input1 = ARGV[0]
+input2 = ARGV[1]
+
+# Find our diff command and break if we don't have one
+diff_path = `which diff`.chomp
+raise "Missing diff command in PATH!" unless $?.success?
+
+# The command we'll use later to see what has changed
+diff_cmd = "#{diff_path} -U 999999"
+
+## Methods / Functions
+def validate_input(input)
+  # Make sure the input is set
+  raise "Missing First Input!" unless input
+  # Make sure the input is a valid file that we can read
+  raise "Invalid Input File #{input}" unless File.readable?(input)
+  # TODO: make sure the input file is valid YAML
+end
+
+def read_input(input)
+  begin
+    YAML.load_file(input)
+  rescue => e
+    raise "Unable to open #{input}: #{e.message}"
+  end
+end
+
+## Execution
+validate_input(input1)
+validate_input(input2)
+
+data1 = read_input(input1)
+data2 = read_input(input2)
+
+if data1 == data2
+  exit 0
+else
+  STDERR.puts "Looks like things have changed!"
+  differences = (data2.to_a - data1.to_a)
+  results = {}
+  differences.each do |user|
+    results[user[0]] = user[1]
+  end
+  # Temporary files for a call to `diff`
+  newdata = Tempfile.new('new')
+  olddata = Tempfile.new('old')
+  
+  # Add the results from our comparison to the first temp file
+  newdata.write(results.to_yaml)
+  
+  # Grab the old data and put it into a new hash for the call to `diff`
+  oldhash = {}
+  results.each do |user,data|
+    oldhash[user] = data1[user] if data1.key?(user)
+  end
+
+  # Write out the old data
+  olddata.write(oldhash.to_yaml)
+
+  # Close and flush our temp files
+  newdata.close
+  olddata.close
+
+  # The actual call to the `diff` command
+  system("#{diff_cmd} #{olddata.path} #{newdata.path}")
+
+  # Destroy the temp files after the diff command finishes
+  newdata.unlink
+  olddata.unlink
+end
+

@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
 
   s.executables << 'cratus'
+  s.executables << 'cratus-compare'
 
   s.required_ruby_version = '~> 2.2'
   s.post_install_message  = 'Thanks for installing Cratus!'
