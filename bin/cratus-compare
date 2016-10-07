@@ -45,9 +45,10 @@ else
   STDERR.puts "Looks like things have changed!"
 
   # Calculate what has actually changed
-  differences = (data2.to_a - data1.to_a)
+  additions_and_differences = (data2.to_a - data1.to_a)
+  removals = (data1.to_a - data2.to_a)
   results = {}
-  differences.each do |user|
+  additions_and_differences.each do |user|
     results[user[0]] = user[1]
   end
 
@@ -62,6 +63,10 @@ else
   oldhash = {}
   results.each do |user,data|
     oldhash[user] = data1[user] if data1.key?(user)
+  end
+  # Add things that were removed from the old data (removed users)
+  removals.each do |removed_user|
+    oldhash[removed_user[0]] = removed_user[1]
   end
 
   # Write out the old data

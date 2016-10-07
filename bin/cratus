@@ -23,7 +23,8 @@ User.all.sort.each do |user|
 
   @results[key] = {'groups' => {}}
   user_groups.sort.each do |ugroup|
-    @results[key]['groups'][ugroup] = group_permissions[ugroup].sort if group_permissions[ugroup]
+    group_perm_set = group_permissions[ugroup] ? group_permissions[ugroup].sort : []
+    @results[key]['groups'][ugroup] = group_perm_set
   end
 end
 
