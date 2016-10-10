@@ -24,6 +24,7 @@ def validate_input(input)
   # TODO: make sure the input file is valid YAML
 end
 
+# Read in some input
 def read_input(input)
   begin
     YAML.load_file(input)
