@@ -25,6 +25,10 @@ module Cratus
       @raw_ldap_data[Cratus.config.user_displayname_attribute].last
     end
 
+    def lockouttime
+      @raw_ldap_data["lockoutTime"].last
+    end
+
     def member_of
       memrof_attr = Cratus.config.user_memberof_attribute
       # TODO: move the search filter to a configurable param
@@ -71,7 +75,8 @@ module Cratus
         Cratus.config.user_department_attribute.to_s,
         Cratus.config.user_mail_attribute.to_s,
         Cratus.config.user_displayname_attribute.to_s,
-        Cratus.config.user_memberof_attribute.to_s
+        Cratus.config.user_memberof_attribute.to_s,
+        Cratus.config.user_lockout_attribute.to_i
       ]
     end
 
