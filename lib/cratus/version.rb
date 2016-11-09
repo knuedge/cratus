@@ -1,3 +1,4 @@
+# The Cratus module
 module Cratus
   def self.version
     major = 0 # Breaking, incompatible releases

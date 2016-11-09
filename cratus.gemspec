@@ -2,6 +2,7 @@ $LOAD_PATH.push File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift('lib') unless $LOAD_PATH.include?('lib')
 require 'cratus/version'
 
+# rubocop:disable Metrics/BlockLength
 Gem::Specification.new do |s|
   s.description = 'The Ruby tool for auditing and reporting on user permissions based on groups'
   s.name        = 'cratus'
@@ -21,8 +22,10 @@ Gem::Specification.new do |s|
     'LICENSE'
   ]
 
+  s.homepage    = 'https://github.com/knuedge/cratus'
   s.license     = 'MIT'
   s.platform    = Gem::Platform::RUBY
+  s.metadata['yard.run'] = 'yri'
 
   s.executables << 'cratus'
   s.executables << 'cratus-compare'
@@ -34,7 +37,11 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'colorize',    '~> 0.7'
   s.add_runtime_dependency 'net-ldap',    '~> 0.10'
 
+  s.add_development_dependency 'bundler', '~> 1.12'
+  s.add_development_dependency 'rake', '~> 10.0'
   s.add_development_dependency 'rspec',   '~> 3.1'
   s.add_development_dependency 'rubocop', '~> 0.35'
   s.add_development_dependency 'yard',    '~> 0.8'
+  s.add_development_dependency 'travis', '~> 1.8'
+  s.add_development_dependency 'simplecov'
 end

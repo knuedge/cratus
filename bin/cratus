@@ -8,7 +8,7 @@ LDAP.connect
 
 # Read in arguments
 group_mapping_arg = ARGV[0]
-raise "Missing Group Mapping Argument!" unless group_mapping_arg
+raise 'Missing Group Mapping Argument!' unless group_mapping_arg
 group_mapping_file = File.expand_path(group_mapping_arg)
 raise "Invalid Group Mapping File #{group_mapping_file}" unless File.readable?(group_mapping_file)
 
@@ -21,7 +21,7 @@ User.all.sort.each do |user|
   key = user.username.to_s
   user_groups = user.member_of.map { |g| g.name.to_s }
 
-  @results[key] = {'groups' => {}}
+  @results[key] = { 'groups' => {} }
   user_groups.sort.each do |ugroup|
     group_perm_set = group_permissions[ugroup] ? group_permissions[ugroup].sort : []
     @results[key]['groups'][ugroup] = group_perm_set

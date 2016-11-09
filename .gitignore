@@ -13,6 +13,12 @@ testing/
 doc/
 .yardoc
 
-
 # ignore sublime text project
 *.sublime-workspace
+
+/.bundle/
+/Gemfile.lock
+/_yardoc/
+/coverage/
+/pkg/
+/spec/reports/

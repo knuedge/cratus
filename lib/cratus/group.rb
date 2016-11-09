@@ -1,4 +1,5 @@
 module Cratus
+  # An LDAP Group representation
   class Group
     include Comparable
     attr_reader :name, :search_base
@@ -25,14 +26,14 @@ module Cratus
     def member_of
       memrof_attr = Cratus.config.group_memberof_attribute
 
-      # TODO make this work with more things...
+      # TODO: make this work with more things...
       unless @raw_ldap_data
         STDERR.puts "WARNING: Group '#{@name}' appears to be invalid or beyond the search scope!"
         return []
       end
 
       # TODO: move the search filter to a configurable param
-      raw_groups = @raw_ldap_data[memrof_attr].reject {|g| g.match /OU=Distribution Groups/ }
+      raw_groups = @raw_ldap_data[memrof_attr].reject { |g| g.match(/OU=Distribution Groups/) }
       initial_groups = raw_groups.map do |raw_group|
         Group.new(raw_group.match(/^#{Group.ldap_dn_attribute.to_s.upcase}=([^,]+),/)[1])
       end
@@ -40,7 +41,7 @@ module Cratus
       initial_groups.each do |group|
         all_the_groups.concat(group.member_of) # recursion!
       end
-      all_the_groups.uniq { |g| g.name }
+      all_the_groups.uniq(&:name)
     end
 
     # LDAP description attribute
@@ -52,7 +53,7 @@ module Cratus
     def self.all
       filter = "(#{ldap_dn_attribute}=*)"
       Cratus::LDAP.search(filter, basedn: ldap_search_base, attrs: ldap_dn_attribute).map do |entry|
-        self.new(entry[ldap_dn_attribute].last)
+        new(entry[ldap_dn_attribute].last)
       end
     end
 
@@ -84,10 +85,11 @@ module Cratus
     private
 
     # provides a Hash of member users and groups
+    #   rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     def all_members
       # filters used to determine if each group member is a User or Group
-      group_filter = "(objectClass=#{Cratus.config.group_objectclass.to_s})"
-      user_filter  = "(objectClass=#{Cratus.config.user_objectclass.to_s})"
+      group_filter = "(objectClass=#{Cratus.config.group_objectclass})"
+      user_filter  = "(objectClass=#{Cratus.config.user_objectclass})"
 
       # The raw LDAP data (a list of DNs)
       raw_members = @raw_ldap_data[Cratus.config.group_member_attribute]
@@ -123,9 +125,9 @@ module Cratus
       end
 
       # deliver the results
-      results[:groups].uniq! { |g| g.name }
-      results[:users].uniq!  { |u| u.username }
-      return results
+      results[:groups].uniq!(&:name)
+      results[:users].uniq!(&:username)
+      results
     end
   end
 end

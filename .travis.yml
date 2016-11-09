@@ -1,0 +1,14 @@
+sudo: false
+language: ruby
+rvm:
+- 2.2
+- 2.3
+cache: bundler
+deploy:
+  provider: rubygems
+  api_key:
+    secure: wTROGFvpmgsuVzP+peKgvo13DLRJ/Cz9BHNXmkhICWj+RW2ViwrCyRzA/GTZwlw/kY/8nbrw7ezsIZCCOrU/hxPEx8fnITXs72d9r8Dp2pqcSXAJPEuv8XAvfPZSLDrPFhxapuuY9x8lsd5WeMcwkO1s9A5B8Cl3OcwTHawf7nFomNKClOlU9rtuggfRrbxaWtRdUefKk6yHljsc6nxuqbtnMGTCOzHvdmLVc2PVZDXuqjS9ICT2OWdMTLgyPOxfbmPLzse3lyKv5hRhW6AmIdWxWXLDghOsqn5ZuCoZ8tv949ncEEI3faEjcO+Yi3Wb6PBTAI595N7g7Yxyk3EZp1eFZDR5khN0b8iiGfDCaddS9qas/yhSiHkeHm9moIGxFgiDT+pJ9a7dhR742X8MqYHHyVdkS2D6cFQpUJgDVkVbkNey6BHk0C8U/ilU+qRZRfOO5LN4+oBnc9YsHkUw1Gofxki+EKz37QTzypCLTQGvwtL23Z98EDzirjSh++0vrXUCLKQqrYuDc1nN0caM8R13lT/lWbAAR4cBr6olmaBFPhYRchBE8/Y4NKpset+Hlw7rbu+C9ZGiABELBZmYWTCp4fsKevKOaK5C3i3unIqAo0KaP8r2UiAJ5KZgoO+Xca5GwpijwEEh6SqPzvnq0VR+VqbhQPNtYWbF61bawV8=
+  gem: cratus
+  on:
+    tags: true
+    repo: knuedge/cratus

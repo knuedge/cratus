@@ -10,7 +10,7 @@ input2 = ARGV[1]
 
 # Find our diff command and break if we don't have one
 diff_path = `which diff`.chomp
-raise "Missing diff command in PATH!" unless $?.success?
+raise 'Missing diff command in PATH!' unless $CHILD_STATUS.success?
 
 # The command we'll use later to see what has changed
 diff_cmd = "#{diff_path} -U 999999"
@@ -18,7 +18,7 @@ diff_cmd = "#{diff_path} -U 999999"
 ## Methods / Functions
 def validate_input(input)
   # Make sure the input is set
-  raise "Missing First Input!" unless input
+  raise 'Missing First Input!' unless input
   # Make sure the input is a valid file that we can read
   raise "Invalid Input File #{input}" unless File.readable?(input)
   # TODO: make sure the input file is valid YAML
@@ -26,11 +26,9 @@ end
 
 # Read in some input
 def read_input(input)
-  begin
-    YAML.load_file(input)
-  rescue => e
-    raise "Unable to open #{input}: #{e.message}"
-  end
+  YAML.load_file(input)
+rescue => e
+  raise "Unable to open #{input}: #{e.message}"
 end
 
 ## Execution
@@ -43,7 +41,7 @@ data2 = read_input(input2)
 if data1 == data2
   exit 0
 else
-  STDERR.puts "Looks like things have changed!"
+  STDERR.puts 'Looks like things have changed!'
 
   # Calculate what has actually changed
   additions_and_differences = (data2.to_a - data1.to_a)
@@ -62,7 +60,7 @@ else
 
   # Grab the old data for just our changed users and put it into a new hash
   oldhash = {}
-  results.each do |user,data|
+  results.each do |user, _data|
     oldhash[user] = data1[user] if data1.key?(user)
   end
   # Add things that were removed from the old data (removed users)
@@ -84,4 +82,3 @@ else
   newdata.unlink
   olddata.unlink
 end
-
