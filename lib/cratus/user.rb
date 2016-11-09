@@ -26,12 +26,11 @@ module Cratus
     end
 
     def lockouttime
-      @raw_ldap_data["lockoutTime"].last
+      @raw_ldap_data[Cratus.config.user_lockout_attribute].last
     end
 
     def locked?
-      lock = @raw_ldap_data["lockoutTime"].last
-      lock != '0'
+      lockouttime != '0'
     end
 
     def member_of
