@@ -28,7 +28,7 @@ module Cratus
     end
 
     def self.connected?
-      @ldap_bound.dup
+      @ldap_bound
     end
 
     # Perform an LDAP search
