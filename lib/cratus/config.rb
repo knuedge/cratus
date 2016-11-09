@@ -17,7 +17,7 @@ class Cratus::Config < OpenStruct
       user_objectclass: :user,
       user_basedn: 'ou=users,dc=example,dc=com',
       user_department_attribute: :department,
-      user_lockout_attribute: :lockouttime
+      user_lockout_attribute: :lockouttime,
       user_mail_attribute: :mail,
       user_displayname_attribute: :displayName,
       user_memberof_attribute: :memberOf,
