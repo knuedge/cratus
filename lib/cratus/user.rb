@@ -18,6 +18,10 @@ module Cratus
       @raw_ldap_data[Cratus.config.user_department_attribute].last
     end
 
+    def dn
+      @raw_ldap_data[:dn].last
+    end
+
     def email
       @raw_ldap_data[Cratus.config.user_mail_attribute].last
     end
