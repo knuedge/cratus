@@ -34,8 +34,24 @@ module Cratus
       @raw_ldap_data[Cratus.config.user_lockout_attribute].last
     end
 
+    # https://fossies.org/linux/web2ldap/pylib/w2lapp/schema/plugins/activedirectory.py
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/ms676843(v=vs.85).aspx
+    # 
     def locked?
-      lockouttime != '0'
+      return false if lockouttime == '0'
+      epoch = 116444736000000000
+      current = Time.now.to_i * 10000000
+      current - (lockouttime - epoch) < lockoutduration
+    end
+
+    def lockoutduration
+      raw_results = Cratus::LDAP.search(
+        '(objectClass=domain)',
+        basedn: Cratus.config.basedn,
+        attrs: 'lockoutDuration',
+        scope: 'object'
+      ).last
+      Integer(raw_results[:lockoutduration].last) * -1
     end
 
     def member_of
