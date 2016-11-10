@@ -36,11 +36,11 @@ module Cratus
 
     # https://fossies.org/linux/web2ldap/pylib/w2lapp/schema/plugins/activedirectory.py
     # https://msdn.microsoft.com/en-us/library/windows/desktop/ms676843(v=vs.85).aspx
-    # 
+    #
     def locked?
       return false if lockouttime == '0'
-      epoch = 116444736000000000
-      current = Time.now.to_i * 10000000
+      epoch = 116_444_736_000_000_000
+      current = Time.now.to_i * 10_000_000
       current - (lockouttime - epoch) < lockoutduration
     end
 
