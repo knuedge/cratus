@@ -2,6 +2,7 @@
 
 require 'yaml'
 require 'tempfile'
+require 'English'
 
 # Used to compare the output of the `cratus` command across multiple runs
 
