@@ -1,5 +1,6 @@
 module Cratus
   # A generic way of constructing a mergeable configuration
+  #   rubocop:disable Metrics/MethodLength
   class Config < OpenStruct
     # A Hash of the default configuration options
     def defaults
@@ -21,7 +22,8 @@ module Cratus
         host: 'ldap.example.com', port: 389,
         basedn: 'dc=example,dc=com',
         username: 'username',
-        password: 'p@assedWard!'
+        password: 'p@assedWard!',
+        include_distribution_groups: true
       }
     end
 

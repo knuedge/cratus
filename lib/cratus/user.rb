@@ -57,7 +57,11 @@ module Cratus
     def member_of
       memrof_attr = Cratus.config.user_memberof_attribute
       # TODO: move the search filter to a configurable param
-      raw_groups = @raw_ldap_data[memrof_attr].reject { |g| g.match(/OU=Distribution Groups/) }
+      if Cratus.config.include_distribution_groups
+        raw_groups = @raw_ldap_data[memrof_attr]
+      else
+        raw_groups = @raw_ldap_data[memrof_attr].reject { |g| g.match(/OU=Distribution Groups/) }
+      end
       initial_groups = raw_groups.map do |raw_group|
         Group.new(raw_group.match(/^#{Group.ldap_dn_attribute.to_s.upcase}=([^,]+),/)[1])
       end
