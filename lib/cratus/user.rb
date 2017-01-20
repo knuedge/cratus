@@ -31,11 +31,9 @@ module Cratus
     end
 
     def lockouttime
-      begin
-        Integer(@raw_ldap_data[Cratus.config.user_lockout_attribute].last.to_s)
-      rescue Exception => e
-        0 # If we can't determine the value (for instance, if it is empty), just assume 0
-      end
+      Integer(@raw_ldap_data[Cratus.config.user_lockout_attribute].last.to_s)
+    rescue => _e
+      0 # If we can't determine the value (for instance, if it is empty), just assume 0
     end
 
     # https://fossies.org/linux/web2ldap/pylib/w2lapp/schema/plugins/activedirectory.py
