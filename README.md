@@ -1,5 +1,7 @@
 # Cratus
 
+[![Gem Version](https://badge.fury.io/rb/cratus.svg)](https://rubygems.org/gems/cratus)
+
 ## Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md) for additional information.
