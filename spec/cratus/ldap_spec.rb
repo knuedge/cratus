@@ -66,7 +66,7 @@ describe Cratus::LDAP do
     expect(subject.connect).to eq(true)
     expect do
       subject.search('(uid=baz*)', cratus_search)
-    end.to raise_error(RuntimeError, 'Search Failed')
+    end.to raise_error(Cratus::Exceptions::FailedLDAPSearch)
     # Put things back how we found them...
     subject.instance_variable_set(:'@ldap_connection', nil)
   end

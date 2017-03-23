@@ -58,7 +58,7 @@ module Cratus
         base: options[:basedn], filter: filter,
         scope: scope_class, attributes: [*attrs].map(&:to_s)
       )
-      results.nil? ? raise('Search Failed') : results.compact
+      results.nil? ? raise(Exceptions::FailedLDAPSearch) : results.compact
     end
 
     # Validation Methods

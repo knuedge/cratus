@@ -35,10 +35,11 @@ describe Cratus::User do
       {
         dn: ['samaccountname=foobar,ou=users,dc=example,dc=com'],
         mail: ['foobar@example.com'],
-        displayname: ['Foo Bar'],
+        displayName: ['Foo Bar'],
         department: ['IT'],
         samaccountname: ['foobar'],
-        lockouttime: ['0']
+        lockouttime: ['0'],
+        memberOf: []
       }
     ]
   end
@@ -48,38 +49,69 @@ describe Cratus::User do
       {
         dn: ['samaccountname=foobar,ou=users,dc=example,dc=com'],
         mail: ['foobar@example.com'],
-        displayname: ['Foo Bar'],
+        displayName: ['Foo Bar'],
         department: ['IT'],
         samaccountname: ['foobar'],
-        lockouttime: ['0']
+        lockouttime: ['0'],
+        memberOf: []
       },
       {
         dn: ['samaccountname=binbaz,ou=users,dc=example,dc=com'],
         mail: ['binbaz@example.com'],
-        displayname: ['Bin Baz'],
+        displayName: ['Bin Baz'],
         department: ['IT'],
         samaccountname: ['binbaz'],
-        lockouttime: ['0']
+        lockouttime: ['0'],
+        memberOf: []
       }
     ]
   end
 
-  it 'finds a valid user' do
-    allow(Cratus::LDAP)
-      .to receive(:search).with(search_filter, search_options)
-      .and_return(search_result)
-    expect { subject.new('foobar') }.not_to raise_error
-    expect(subject.new('foobar').email).to eq('foobar@example.com')
+  context 'for a valid user' do
+    it 'finds a valid user' do
+      allow(Cratus::LDAP)
+        .to receive(:search).with(search_filter, search_options)
+        .and_return(search_result)
+
+      expect { subject.new('foobar') }.not_to raise_error
+    end
+
+    it 'provides a user with expected attributes' do
+      allow(Cratus::LDAP)
+        .to receive(:search).with(search_filter, search_options)
+        .and_return(search_result)
+
+      user = subject.new('foobar')
+      expect(user.department).to eq('IT')
+      expect(user.dn).to eq('samaccountname=foobar,ou=users,dc=example,dc=com')
+      expect(user.email).to eq('foobar@example.com')
+      expect(user.fullname).to eq('Foo Bar')
+      expect(user.locked?).to be false
+      expect(user.groups).to eq([])
+    end
   end
 
-  it 'finds a list of users' do
+  context 'for an invalid user' do
+    it 'finding raises an exception' do
+      allow(Cratus::LDAP)
+        .to receive(:search).with(search_filter, search_options)
+        .and_raise(Cratus::Exceptions::FailedLDAPSearch)
+
+      expect { subject.new('foobaz') }.to raise_error(Cratus::Exceptions::FailedLDAPSearch)
+    end
+  end
+
+  it 'finds all users' do
     allow(Cratus::LDAP)
       .to receive(:search).with(find_all_filter, find_all_options)
       .and_return(find_all_results)
     allow(Cratus::LDAP)
       .to receive(:search).with(search_filter, search_options)
       .and_return(search_result)
+
     expect { subject.all }.not_to raise_error
-    expect(subject.all.first.email).to eq('foobar@example.com')
+    list = subject.all
+    expect(list.size).to eq(find_all_results.size)
+    expect(list.first.email).to eq('foobar@example.com')
   end
 end
