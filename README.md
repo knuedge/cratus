@@ -118,6 +118,7 @@ The `Group` class also implements [Comparable](https://ruby-doc.org/core-2.3.0/C
 The `User` class supports the following finder methods:
 
 * `Cratus::User.all` returns an `Array` of all users scoped at or below the `user_basedn`.
+* `Cratus::User.new('name')` creates a new instance populated with details from LDAP (or raises `Cratus::Exceptions::FailedLDAPSearch` if the group can't be found).
 
 Instances of `User` have the following attributes and methods:
 
