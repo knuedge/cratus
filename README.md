@@ -8,7 +8,7 @@ Cratus is a simple library, primarily used by [KnuEdge](https://www.knuedge.com)
 
 ## Why Cratus?
 
-Why not just use `Net::LDAP`? Well, in fact, this library does use `Net::LDAP`, but does some making some assumptions based on how we (and arguably most people) use LDAP with Active Directory. By building linkages between users and groups, baking in recursion (supporting so-called nested groups), and making just the right things configurable, Cratus provides a simple interface for common LDAP admin tasks. That said, it isn't meant to be general-purpose LDAP libary, so it hides a lot and is opinionated. If you're using Active Directory and not doing strange things with it, this library might be helpful.
+Why not just use `Net::LDAP`? Well, in fact, this library does use `Net::LDAP`, but does some making so assumptions based on how we (and arguably most people) use LDAP with Active Directory. By building linkages between users and groups, baking in recursion (supporting so-called nested groups), and making just the right things configurable, Cratus provides a simple interface for common LDAP admin tasks. That said, it isn't meant to be general-purpose LDAP libary, so it hides a lot and is opinionated. If you're using Active Directory and not doing strange things with it, this library might be helpful.
 
 ## Installation
 
