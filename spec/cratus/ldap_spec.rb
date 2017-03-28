@@ -16,7 +16,7 @@ describe Cratus::LDAP do
 
   let(:cratus_search) do
     {
-      attrs: [:uid, :displayname, :department, :samaccountname, :lockouttime],
+      attrs: %i(uid displayname department samaccountname lockouttime),
       basedn: 'ou=users,dc=example,dc=com'
     }
   end
