@@ -12,3 +12,4 @@ Cratus.config.load
 require 'cratus/ldap'
 require 'cratus/group'
 require 'cratus/user'
+require 'cratus/exceptions/failed_ldap_search'

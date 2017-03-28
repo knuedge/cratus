@@ -23,6 +23,7 @@ module Cratus
       all_members[:groups]
     end
 
+    # Recursively determine group memberships of a group
     def member_of
       memrof_attr = Cratus.config.group_memberof_attribute
 
@@ -48,6 +49,11 @@ module Cratus
       all_the_groups.uniq(&:name)
     end
 
+    # Returns the LDAP dn for a Group
+    def dn
+      @raw_ldap_data[:dn].last
+    end
+
     # LDAP description attribute
     def description
       @raw_ldap_data[Cratus.config.group_description_attribute].last
@@ -57,7 +63,7 @@ module Cratus
     def self.all
       filter = "(#{ldap_dn_attribute}=*)"
       Cratus::LDAP.search(filter, basedn: ldap_search_base, attrs: ldap_dn_attribute).map do |entry|
-        new(entry[ldap_dn_attribute].last)
+        new(entry[ldap_dn_attribute.to_sym].last)
       end
     end
 
@@ -82,6 +88,8 @@ module Cratus
       Cratus.config.group_basedn.to_s
     end
 
+    # Compare based on the group's name
+    # TODO: possibly change to dn
     def <=>(other)
       @name <=> other.name
     end
