@@ -10,13 +10,13 @@ describe Cratus::LDAP do
       base: 'ou=users,dc=example,dc=com',
       filter: '(uid=foo*)',
       scope: 2,
-      attributes: %w(uid displayname department samaccountname lockouttime)
+      attributes: %w[uid displayname department samaccountname lockouttime]
     }
   end
 
   let(:cratus_search) do
     {
-      attrs: %i(uid displayname department samaccountname lockouttime),
+      attrs: %i[uid displayname department samaccountname lockouttime],
       basedn: 'ou=users,dc=example,dc=com'
     }
   end

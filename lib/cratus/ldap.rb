@@ -95,7 +95,7 @@ module Cratus
     def self.validate_connection_options(options)
       raise 'Invalid Options' unless options.respond_to?(:key?)
 
-      %i(host port basedn username password).each do |key|
+      %i[host port basedn username password].each do |key|
         raise "Missing Option: #{key}" unless options.key?(key)
       end
     end
