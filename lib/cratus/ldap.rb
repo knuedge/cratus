@@ -61,6 +61,15 @@ module Cratus
       results.nil? ? raise(Exceptions::FailedLDAPSearch) : results.compact
     end
 
+    # Modify an LDAP object's attribute
+    def self.replace_attribute(dn, attribute, values)
+      validate_ldap_connection
+      validate_ldap_bound
+      validate_attribute_values(values)
+
+      connection.replace_attribute(dn, attribute, values)
+    end
+
     # Validation Methods
 
     def self.validate_ldap_bound
@@ -77,6 +86,10 @@ module Cratus
       [:basedn].each do |key|
         raise "Missing Option: #{key}" unless options.key?(key)
       end
+    end
+
+    def self.validate_attribute_values(values)
+      raise 'Values Must Be Array' unless values.is_a?(Array)
     end
 
     def self.validate_connection_options(options)
