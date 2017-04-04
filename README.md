@@ -103,13 +103,18 @@ The `Group` class supports the following finder methods:
 * `Cratus::Group.all` returns an `Array<Cratus::Group>` of all groups scoped at or below the `group_basedn`.
 * `Cratus::Group.new('name')` creates a new instance populated with details from LDAP (or raises `Cratus::Exceptions::FailedLDAPSearch` if the group can't be found).
 
-Instances of `Group` have the following attributes and methods:
+Instances of `Group` have the following read-only attributes and methods:
 
 * `#members` provides an `Array<Cratus::User>` of all users that are a member of the group. It does this recursively, so it supports nested groups.
 * `#member_groups` provides an `Array<Cratus::Group>` of all groups that are a member of the group. It does this recursively, so it supports nested groups.
 * `#member_of` provides an `Array<Cratus::Group>` of all groups that this group is a member of. It does this recursively, so it supports nested groups.
 * `#dn` returns the distinguished name (dn) of the LDAP object
 * `#description` returns the configurable LDAP "description" attribute as stored in LDAP if it exists. Otherwise it returns `nil`.
+
+Instances of `Group` have the following methods that can change the underlying LDAP object:
+
+* `#add_user(user)` allows adding individual LDAP users to a group. This method takes as input an instance of `Cratus::User`. It is idempotent and will add users as direct members of the group unless the user is already a member (directly or indirectly).
+* `#remove_user(user)` allows removing individual LDAP users from a group. This method takes as input an instance of `Cratus::User`. It is idempotent and will remove users that are direct members of the group.
 
 The `Group` class also implements [Comparable](https://ruby-doc.org/core-2.3.0/Comparable.html), so it supports common comparison methods, most notably `==`.
 
@@ -120,7 +125,7 @@ The `User` class supports the following finder methods:
 * `Cratus::User.all` returns an `Array` of all users scoped at or below the `user_basedn`.
 * `Cratus::User.new('name')` creates a new instance populated with details from LDAP (or raises `Cratus::Exceptions::FailedLDAPSearch` if the group can't be found).
 
-Instances of `User` have the following attributes and methods:
+Instances of `User` have the following read-only attributes and methods:
 
 * `#department` returns the LDAP "department" attribute as stored in LDAP if it exists. Otherwise it returns `nil`.
 * `#email` returns the configurable LDAP "mail" attribute as stored in LDAP if it exists. Otherwise it returns `nil`.
@@ -130,6 +135,11 @@ Instances of `User` have the following attributes and methods:
 * `#locked?` returns `true` or `false` based on `#lockouttime` and `#lockoutduration`.
 * `#member_of` provides an `Array<Cratus::Group>` of all groups that this user is a member of. It does this recursively, so it supports nested groups.
 * `#dn` returns the distinguished name (dn) of the LDAP object
+
+Instances of `User` have the following methods that can change the underlying LDAP object:
+
+* `#add_to_group(group)` allows adding an LDAP user to a group. This method takes as input an instance of `Cratus::Group`. It is idempotent and will add users as direct members of the group unless the user is already a member (directly or indirectly).
+* `#remove_from_group(group)` allows removing an LDAP user from a group. This method takes as input an instance of `Cratus::Group`. It is idempotent and will remove the user if it is a direct members of the group.
 
 The `User` class also implements [Comparable](https://ruby-doc.org/core-2.3.0/Comparable.html), so it supports common comparison methods, most notably `==`.
 
