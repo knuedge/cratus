@@ -16,14 +16,14 @@ module Cratus
 
     # Add a user to a group
     def add_to_group(group)
-      raise 'InvalidGroup' unless group.is_a?(Group)
+      raise 'InvalidGroup' unless group.respond_to?(:add_user)
       # just be lazy and hand off to the group to do the work...
       group.add_user(self)
     end
 
     # Remove a user from a group
     def remove_from_group(group)
-      raise 'InvalidGroup' unless group.is_a?(Group)
+      raise 'InvalidGroup' unless group.respond_to?(:remove_user)
       # just be lazy and hand off to the group to do the work...
       group.remove_user(self)
     end

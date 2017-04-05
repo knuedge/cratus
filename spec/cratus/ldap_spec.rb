@@ -14,6 +14,14 @@ describe Cratus::LDAP do
     }
   end
 
+  let(:netldap_args) do
+    [
+      'uid=foobar,ou=users,dc=example,dc=com',
+      :department,
+      ['Test']
+    ]
+  end
+
   let(:cratus_search) do
     {
       attrs: %i[uid displayname department samaccountname lockouttime],
@@ -38,6 +46,8 @@ describe Cratus::LDAP do
     ldap = instance_double('Net::LDAP', bind: true)
     allow(ldap).to receive(:search).and_return(nil)
     allow(ldap).to receive(:search).with(netldap_search).and_return(search_result)
+    allow(ldap).to receive(:replace_attribute).and_return(false)
+    allow(ldap).to receive(:replace_attribute).with(*netldap_args).and_return(true)
     ldap
   end
 
@@ -57,6 +67,14 @@ describe Cratus::LDAP do
     allow(Net::LDAP).to receive(:new).and_return(ldap_instance)
     expect(subject.connect).to eq(true)
     expect(subject.search('(uid=foo*)', cratus_search)).to eq(search_result)
+    # Put things back how we found them...
+    subject.instance_variable_set(:'@ldap_connection', nil)
+  end
+
+  it 'allows modifying LDAP attributes' do
+    allow(Net::LDAP).to receive(:new).and_return(ldap_instance)
+    expect(subject.connect).to eq(true)
+    expect(subject.replace_attribute(*netldap_args)).to eq(true)
     # Put things back how we found them...
     subject.instance_variable_set(:'@ldap_connection', nil)
   end
