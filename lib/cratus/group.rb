@@ -59,6 +59,34 @@ module Cratus
       @raw_ldap_data[Cratus.config.group_description_attribute].last
     end
 
+    # Add a User to the group
+    def add_user(user)
+      raise 'InvalidUser' unless user.respond_to?(:dn)
+      direct_members = @raw_ldap_data[Cratus.config.group_member_attribute]
+      return true if direct_members.include?(user.dn)
+
+      direct_members << user.dn
+      Cratus::LDAP.replace_attribute(
+        dn,
+        Cratus.config.group_member_attribute,
+        direct_members.uniq
+      )
+    end
+
+    # Remove a User from the group
+    def remove_user(user)
+      raise 'InvalidUser' unless user.respond_to?(:dn)
+      direct_members = @raw_ldap_data[Cratus.config.group_member_attribute]
+      return true unless direct_members.include?(user.dn)
+
+      direct_members.delete(user.dn)
+      Cratus::LDAP.replace_attribute(
+        dn,
+        Cratus.config.group_member_attribute,
+        direct_members.uniq
+      )
+    end
+
     # All the LDAP Groups
     def self.all
       filter = "(#{ldap_dn_attribute}=*)"

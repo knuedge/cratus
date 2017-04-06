@@ -9,6 +9,13 @@ describe Cratus::Group do
 
   let(:find_all_filter) { '(cn=*)' }
 
+  let(:fake_user) do
+    instance_double(
+      'Cratus::User',
+      dn: 'uid=fakeuser,ou=users,dc=example,dc=com'
+    )
+  end
+
   let(:search_options) do
     {
       basedn: 'ou=groups,dc=example,dc=com',
@@ -36,6 +43,18 @@ describe Cratus::Group do
         description: ['A Test Group'],
         member: [],
         memberOf: ['cn=test2,ou=groups,dc=example,dc=com']
+      }
+    ]
+  end
+
+  let(:search_result_with_member) do
+    [
+      {
+        dn: ['cn=test2,ou=groups,dc=example,dc=com'],
+        cn: ['test2'],
+        description: ['Another Test Group'],
+        member: ['uid=fakeuser,ou=users,dc=example,dc=com'],
+        memberOf: []
       }
     ]
   end
@@ -77,6 +96,48 @@ describe Cratus::Group do
       expect(group.dn).to eq('cn=test1,ou=groups,dc=example,dc=com')
       expect(group.description).to eq('A Test Group')
       expect(group.members).to eq([])
+    end
+
+    it 'allows adding a user' do
+      allow(Cratus::LDAP)
+        .to receive(:search).with(search_filter, search_options)
+        .and_return(search_result)
+      allow(Cratus::LDAP)
+        .to receive(:replace_attribute)
+        .with(
+          'cn=test1,ou=groups,dc=example,dc=com',
+          Cratus.config.group_member_attribute,
+          [fake_user.dn]
+        )
+        .and_return(true)
+
+      group = subject.new('test1')
+      # Adding should return true
+      expect(group.add_user(fake_user)).to eq(true)
+      # Raw LDAP cache should contain the new user's dn
+      #   Cheaper way of determining if it worked, rather than mocking actual users
+      expect(group.instance_variable_get(:'@raw_ldap_data')[:member])
+        .to eq(['uid=fakeuser,ou=users,dc=example,dc=com'])
+    end
+
+    it 'allows removing a member' do
+      allow(Cratus::LDAP)
+        .to receive(:search).with(search_filter, search_options)
+        .and_return(search_result_with_member)
+      allow(Cratus::LDAP)
+        .to receive(:replace_attribute)
+        .with(
+          'cn=test2,ou=groups,dc=example,dc=com',
+          Cratus.config.group_member_attribute,
+          []
+        )
+        .and_return(true)
+
+      group = subject.new('test2')
+      # Removing should return true
+      expect(group.remove_user(fake_user)).to eq(true)
+      # Raw LDAP cache for members should be empty
+      expect(group.instance_variable_get(:'@raw_ldap_data')[:member]).to eq([])
     end
   end
 
