@@ -18,7 +18,8 @@ describe Cratus::User do
         Cratus.config.user_mail_attribute.to_s,
         Cratus.config.user_displayname_attribute.to_s,
         Cratus.config.user_memberof_attribute.to_s,
-        Cratus.config.user_lockout_attribute.to_s
+        Cratus.config.user_lockout_attribute.to_s,
+        Cratus.config.user_account_control_attribute.to_s
       ]
     }
   end
@@ -39,7 +40,8 @@ describe Cratus::User do
         department: ['IT'],
         samaccountname: ['foobar'],
         lockouttime: ['0'],
-        memberOf: []
+        memberOf: [],
+        useraccountcontrol: ['512']
       }
     ]
   end
@@ -53,7 +55,8 @@ describe Cratus::User do
         department: ['IT'],
         samaccountname: ['foobar'],
         lockouttime: ['0'],
-        memberOf: []
+        memberOf: [],
+        useraccountcontrol: ['512']
       },
       {
         dn: ['samaccountname=binbaz,ou=users,dc=example,dc=com'],
@@ -62,7 +65,8 @@ describe Cratus::User do
         department: ['IT'],
         samaccountname: ['binbaz'],
         lockouttime: ['0'],
-        memberOf: []
+        memberOf: [],
+        useraccountcontrol: ['512']
       }
     ]
   end

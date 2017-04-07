@@ -46,6 +46,7 @@ Cratus supports configuration settings, controlled via the following keys with t
         user_dn_attribute: :samaccountname,
         user_objectclass: :user,
         user_basedn: 'ou=users,dc=example,dc=com',
+        user_account_control_attribute: :userAccountControl,
         user_department_attribute: :department,
         user_lockout_attribute: :lockouttime,
         user_mail_attribute: :mail,
@@ -128,7 +129,9 @@ The `User` class supports the following finder methods:
 Instances of `User` have the following read-only attributes and methods:
 
 * `#department` returns the LDAP "department" attribute as stored in LDAP if it exists. Otherwise it returns `nil`.
+* `#disabled?` returns `true` of `false` to indicate whether the User is fully disabled in LDAP.
 * `#email` returns the configurable LDAP "mail" attribute as stored in LDAP if it exists. Otherwise it returns `nil`.
+* `#enabled?` returns `true` of `false` to indicate whether the User is fully enabled in LDAP.
 * `#fullname` returns the configurable LDAP "displayName" attribute as stored in LDAP if it exists. Otherwise it returns `nil`.
 * `#lockouttime` returns the configurable LDAP "lockouttime" attribute as stored in LDAP if it exists. Otherwise it returns `0`.
 * `#lockoutduration` queries the Active Directory basedn for the `lockoutDuration` attribute for use in calculations with `#lockouttime`.
@@ -140,6 +143,9 @@ Instances of `User` have the following methods that can change the underlying LD
 
 * `#add_to_group(group)` allows adding an LDAP user to a group. This method takes as input an instance of `Cratus::Group`. It is idempotent and will add users as direct members of the group unless the user is already a member (directly or indirectly).
 * `#remove_from_group(group)` allows removing an LDAP user from a group. This method takes as input an instance of `Cratus::Group`. It is idempotent and will remove the user if it is a direct members of the group.
+* `#disable` changes the User Account Control (usually `userAccountControl`) attribute to `514`, signifying that logins are not allowed.
+* `#enable` changes the User Account Control (usually `userAccountControl`) attribute to `512`, signifying that logins are allowed.
+* `#unlock` changes the `lockouttime` atrribute to `0`, signifying that the account is not locked out.
 
 The `User` class also implements [Comparable](https://ruby-doc.org/core-2.3.0/Comparable.html), so it supports common comparison methods, most notably `==`.
 
