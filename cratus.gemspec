@@ -2,7 +2,6 @@ $LOAD_PATH.push File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift('lib') unless $LOAD_PATH.include?('lib')
 require 'cratus/version'
 
-# rubocop:disable Metrics/BlockLength
 Gem::Specification.new do |s|
   s.description = 'The Ruby tool for auditing and reporting on user permissions based on groups'
   s.name        = 'cratus'

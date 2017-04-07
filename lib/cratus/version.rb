@@ -2,7 +2,7 @@
 module Cratus
   def self.version
     major = 0 # Breaking, incompatible releases
-    minor = 4 # Compatible, but new features
+    minor = 5 # Compatible, but new features
     patch = 0 # Fixes to existing features
     [major, minor, patch].map(&:to_s).join('.')
   end

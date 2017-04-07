@@ -7,15 +7,44 @@ module Cratus
     def initialize(username)
       @username = username
       @search_base = self.class.ldap_search_base
-      @raw_ldap_data = Cratus::LDAP.search(
-        "(#{self.class.ldap_dn_attribute}=#{@username})",
-        basedn: @search_base,
-        attrs: self.class.ldap_return_attributes
-      ).last
+      refresh
+    end
+
+    # Add a user to a group
+    def add_to_group(group)
+      raise 'InvalidGroup' unless group.respond_to?(:add_user)
+      # just be lazy and hand off to the group to do the work...
+      group.add_user(self)
+    end
+
+    # Remove a user from a group
+    def remove_from_group(group)
+      raise 'InvalidGroup' unless group.respond_to?(:remove_user)
+      # just be lazy and hand off to the group to do the work...
+      group.remove_user(self)
     end
 
     def department
       @raw_ldap_data[Cratus.config.user_department_attribute].last
+    end
+
+    # Disables an enabled user
+    def disable
+      if enabled?
+        Cratus::LDAP.replace_attribute(
+          dn,
+          Cratus.config.user_account_control_attribute,
+          ['514']
+        )
+        refresh
+      else
+        true
+      end
+    end
+
+    def disabled?
+      status = @raw_ldap_data[Cratus.config.user_account_control_attribute].last
+      status.to_s == '514'
     end
 
     def dn
@@ -26,12 +55,33 @@ module Cratus
       @raw_ldap_data[Cratus.config.user_mail_attribute].last
     end
 
+    # Enables a disabled user
+    def enable
+      if disabled?
+        Cratus::LDAP.replace_attribute(
+          dn,
+          Cratus.config.user_account_control_attribute,
+          ['512']
+        )
+        refresh
+      else
+        true
+      end
+    end
+
+    def enabled?
+      status = @raw_ldap_data[Cratus.config.user_account_control_attribute].last
+      status.to_s == '512'
+    end
+
     def fullname
       @raw_ldap_data[Cratus.config.user_displayname_attribute].last
     end
 
     def lockouttime
       Integer(@raw_ldap_data[Cratus.config.user_lockout_attribute].last.to_s)
+    rescue => _e
+      0 # If we can't determine the value (for instance, if it is empty), just assume 0
     end
 
     # https://fossies.org/linux/web2ldap/pylib/w2lapp/schema/plugins/activedirectory.py
@@ -74,6 +124,32 @@ module Cratus
 
     alias groups member_of
 
+    def refresh
+      @raw_ldap_data = Cratus::LDAP.search(
+        "(#{self.class.ldap_dn_attribute}=#{@username})",
+        basedn: @search_base,
+        attrs: self.class.ldap_return_attributes
+      ).last
+    end
+
+    # Unlocks a user
+    # @return `true` on success (or if user is already unlocked)
+    # @return `false` when the account is disabled (unlocking not permitted)
+    def unlock
+      if locked? && enabled?
+        Cratus::LDAP.replace_attribute(
+          dn,
+          Cratus.config.user_lockout_attribute,
+          ['0']
+        )
+        refresh
+      elsif disabled?
+        false
+      else
+        true
+      end
+    end
+
     def <=>(other)
       @username <=> other.username
     end
@@ -105,7 +181,8 @@ module Cratus
         Cratus.config.user_mail_attribute.to_s,
         Cratus.config.user_displayname_attribute.to_s,
         Cratus.config.user_memberof_attribute.to_s,
-        Cratus.config.user_lockout_attribute.to_s
+        Cratus.config.user_lockout_attribute.to_s,
+        Cratus.config.user_account_control_attribute.to_s
       ]
     end
 

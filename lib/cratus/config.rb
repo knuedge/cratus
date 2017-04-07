@@ -14,6 +14,7 @@ module Cratus
         user_dn_attribute: :samaccountname,
         user_objectclass: :user,
         user_basedn: 'ou=users,dc=example,dc=com',
+        user_account_control_attribute: :userAccountControl,
         user_department_attribute: :department,
         user_lockout_attribute: :lockouttime,
         user_mail_attribute: :mail,

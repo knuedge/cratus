@@ -12,3 +12,10 @@ Metrics/MethodLength:
 
 Metrics/CyclomaticComplexity:
   Max: 10
+
+Metrics/BlockLength:
+  Exclude:
+    - '*.gemspec'
+    - Rakefile
+    - 'spec/**/*_spec.rb'
+    - 'spec/spec_helper.rb'
