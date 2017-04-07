@@ -7,11 +7,7 @@ module Cratus
     def initialize(username)
       @username = username
       @search_base = self.class.ldap_search_base
-      @raw_ldap_data = Cratus::LDAP.search(
-        "(#{self.class.ldap_dn_attribute}=#{@username})",
-        basedn: @search_base,
-        attrs: self.class.ldap_return_attributes
-      ).last
+      refresh
     end
 
     # Add a user to a group
@@ -38,8 +34,9 @@ module Cratus
         Cratus::LDAP.replace_attribute(
           dn,
           Cratus.config.user_account_control_attribute,
-          '514'
+          ['514']
         )
+        refresh
       else
         true
       end
@@ -64,8 +61,9 @@ module Cratus
         Cratus::LDAP.replace_attribute(
           dn,
           Cratus.config.user_account_control_attribute,
-          '512'
+          ['512']
         )
+        refresh
       else
         true
       end
@@ -126,6 +124,14 @@ module Cratus
 
     alias groups member_of
 
+    def refresh
+      @raw_ldap_data = Cratus::LDAP.search(
+        "(#{self.class.ldap_dn_attribute}=#{@username})",
+        basedn: @search_base,
+        attrs: self.class.ldap_return_attributes
+      ).last
+    end
+
     # Unlocks a user
     # @return `true` on success (or if user is already unlocked)
     # @return `false` when the account is disabled (unlocking not permitted)
@@ -134,8 +140,9 @@ module Cratus
         Cratus::LDAP.replace_attribute(
           dn,
           Cratus.config.user_lockout_attribute,
-          '0'
+          ['0']
         )
+        refresh
       elsif disabled?
         false
       else
@@ -174,7 +181,8 @@ module Cratus
         Cratus.config.user_mail_attribute.to_s,
         Cratus.config.user_displayname_attribute.to_s,
         Cratus.config.user_memberof_attribute.to_s,
-        Cratus.config.user_lockout_attribute.to_s
+        Cratus.config.user_lockout_attribute.to_s,
+        Cratus.config.user_account_control_attribute.to_s
       ]
     end
 
