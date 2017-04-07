@@ -32,12 +32,48 @@ module Cratus
       @raw_ldap_data[Cratus.config.user_department_attribute].last
     end
 
+    # Disables an enabled user
+    def disable
+      if enabled?
+        Cratus::LDAP.replace_attribute(
+          dn,
+          Cratus.config.user_account_control_attribute,
+          '514'
+        )
+      else
+        true
+      end
+    end
+
+    def disabled?
+      status = @raw_ldap_data[Cratus.config.user_account_control_attribute].last
+      status.to_s == '514'
+    end
+
     def dn
       @raw_ldap_data[:dn].last
     end
 
     def email
       @raw_ldap_data[Cratus.config.user_mail_attribute].last
+    end
+
+    # Enables a disabled user
+    def enable
+      if disabled?
+        Cratus::LDAP.replace_attribute(
+          dn,
+          Cratus.config.user_account_control_attribute,
+          '512'
+        )
+      else
+        true
+      end
+    end
+
+    def enabled?
+      status = @raw_ldap_data[Cratus.config.user_account_control_attribute].last
+      status.to_s == '512'
     end
 
     def fullname
@@ -89,6 +125,23 @@ module Cratus
     end
 
     alias groups member_of
+
+    # Unlocks a user
+    # @return `true` on success (or if user is already unlocked)
+    # @return `false` when the account is disabled (unlocking not permitted)
+    def unlock
+      if locked? && enabled?
+        Cratus::LDAP.replace_attribute(
+          dn,
+          Cratus.config.user_lockout_attribute,
+          '0'
+        )
+      elsif disabled?
+        false
+      else
+        true
+      end
+    end
 
     def <=>(other)
       @username <=> other.username
