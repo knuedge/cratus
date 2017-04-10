@@ -1,6 +1,7 @@
 # Cratus
 
 [![Gem Version](https://badge.fury.io/rb/cratus.svg)](https://rubygems.org/gems/cratus)
+[![Coverage Status](https://coveralls.io/repos/github/knuedge/cratus/badge.svg?branch=master)](https://coveralls.io/github/knuedge/cratus?branch=master)
 
 ## What is Cratus?
 
