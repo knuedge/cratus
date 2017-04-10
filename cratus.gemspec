@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
     'lib/cratus/ldap.rb',
     'lib/cratus/user.rb',
     'lib/cratus/version.rb',
+    'lib/cratus/exceptions/failed_ldap_search',
     'LICENSE'
   ]
 
