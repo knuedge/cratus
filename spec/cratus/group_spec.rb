@@ -7,6 +7,10 @@ describe Cratus::Group do
 
   let(:search_filter) { /^\(cn=\w+\)$/ }
 
+  let(:memberof_search_filter) { '(cn=test1)' }
+
+  let(:search_filter2) { '(cn=test2)' }
+
   let(:find_all_filter) { '(cn=*)' }
 
   let(:fake_user) do
@@ -19,6 +23,19 @@ describe Cratus::Group do
   let(:search_options) do
     {
       basedn: 'ou=groups,dc=example,dc=com',
+      attrs: [
+        Cratus.config.group_dn_attribute.to_s,
+        Cratus.config.group_member_attribute.to_s,
+        Cratus.config.group_description_attribute.to_s,
+        Cratus.config.group_memberof_attribute.to_s
+      ]
+    }
+  end
+
+  let(:search_options_for_child_groups) do
+    {
+      basedn: 'cn=test1,ou=groups,dc=example,dc=com',
+      scope: 'object',
       attrs: [
         Cratus.config.group_dn_attribute.to_s,
         Cratus.config.group_member_attribute.to_s,
@@ -42,7 +59,19 @@ describe Cratus::Group do
         cn: ['test1'],
         description: ['A Test Group'],
         member: [],
-        memberOf: ['cn=test2,ou=groups,dc=example,dc=com']
+        memberOf: ['CN=test2,ou=groups,dc=example,dc=com']
+      }
+    ]
+  end
+
+  let(:search_result2) do
+    [
+      {
+        dn: ['cn=test2,ou=groups,dc=example,dc=com'],
+        cn: ['test2'],
+        description: ['A Second Test Group'],
+        member: ['cn=test1,ou=groups,dc=example,dc=com'],
+        memberOf: []
       }
     ]
   end
@@ -96,6 +125,36 @@ describe Cratus::Group do
       expect(group.dn).to eq('cn=test1,ou=groups,dc=example,dc=com')
       expect(group.description).to eq('A Test Group')
       expect(group.members).to eq([])
+    end
+
+    it 'provides a list of parent groups' do
+      allow(Cratus::LDAP)
+        .to receive(:search).with(memberof_search_filter, search_options)
+        .and_return(search_result)
+      allow(Cratus::LDAP)
+        .to receive(:search).with(search_filter2, search_options)
+        .and_return(search_result2)
+
+      child = subject.new('test1')
+      expect(child.member_of).to eq([subject.new('test2')])
+    end
+
+    it 'provides a list of child groups' do
+      allow(Cratus::LDAP)
+        .to receive(:search).with('(objectClass=group)', search_options_for_child_groups)
+        .and_return(search_result)
+      allow(Cratus::LDAP)
+        .to receive(:search).with(memberof_search_filter, search_options)
+        .and_return(search_result)
+      allow(Cratus::LDAP)
+        .to receive(:search).with(search_filter2, search_options)
+        .and_return(search_result2)
+      allow(Cratus::LDAP)
+        .to receive(:search).with('(objectClass=user)', anything)
+        .and_return([])
+
+      parent = subject.new('test2')
+      expect(parent.member_groups).to eq([subject.new('test1')])
     end
 
     it 'allows adding a user' do
