@@ -71,7 +71,7 @@ describe Cratus::User do
         samaccountname: ['foobar'],
         lockouttime: ['0'],
         memberOf: [],
-        useraccountcontrol: ['512']
+        userAccountControl: ['512']
       }
     ]
   end
@@ -196,6 +196,16 @@ describe Cratus::User do
 
       user = subject.new('foobar')
       expect(user.locked?).to eq(true)
+    end
+
+    it 'determines if a user is enabled' do
+      allow(Cratus::LDAP)
+        .to receive(:search).with(search_filter, search_options)
+        .and_return(search_result)
+
+      user = subject.new('foobar')
+      expect(user.enabled?).to eq(true)
+      expect(user.disabled?).to eq(false)
     end
 
     it 'ignores distribution group memberships when told to' do
