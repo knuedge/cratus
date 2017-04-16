@@ -147,7 +147,7 @@ module Cratus
         )
 
         if !user_result.nil? && !user_result.empty?
-          results[:users] << User.new(user_result.last[User.ldap_dn_attribute].last)
+          results[:users] << User.new(user_result.last[User.ldap_dn_attribute.to_sym].last)
         else
           group_result = Cratus::LDAP.search(
             group_filter,
@@ -156,7 +156,7 @@ module Cratus
             attrs: self.class.ldap_return_attributes
           )
           unless group_result.nil? || group_result.empty?
-            nested_group = Group.new(group_result.last[self.class.ldap_dn_attribute].last)
+            nested_group = Group.new(group_result.last[self.class.ldap_dn_attribute.to_sym].last)
             results[:groups] << nested_group
             results[:groups].concat(nested_group.member_groups)
             results[:users].concat(nested_group.members)

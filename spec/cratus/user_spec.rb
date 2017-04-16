@@ -9,6 +9,28 @@ describe Cratus::User do
 
   let(:find_all_filter) { '(objectClass=user)' }
 
+  let(:fake_group) do
+    instance_double(
+      'Cratus::Group',
+      dn: 'CN=fakegroup,ou=groups,dc=example,dc=com',
+      name: 'fakegroup',
+      add_user: true,
+      remove_user: true,
+      member_of: []
+    )
+  end
+
+  let(:fake_distro) do
+    instance_double(
+      'Cratus::Group',
+      dn: 'CN=fakedistro,ou=groups,dc=example,dc=com',
+      name: 'fakedistro',
+      add_user: true,
+      remove_user: true,
+      member_of: []
+    )
+  end
+
   let(:search_options) do
     {
       basedn: 'ou=users,dc=example,dc=com',
@@ -21,6 +43,14 @@ describe Cratus::User do
         Cratus.config.user_lockout_attribute.to_s,
         Cratus.config.user_account_control_attribute.to_s
       ]
+    }
+  end
+
+  let(:lockoutduration_search_options) do
+    {
+      basedn: 'dc=example,dc=com',
+      attrs: 'lockoutDuration',
+      scope: 'object'
     }
   end
 
@@ -40,6 +70,50 @@ describe Cratus::User do
         department: ['IT'],
         samaccountname: ['foobar'],
         lockouttime: ['0'],
+        memberOf: [],
+        userAccountControl: ['512']
+      }
+    ]
+  end
+
+  let(:search_result_with_groups) do
+    [
+      {
+        dn: ['samaccountname=foobar,ou=users,dc=example,dc=com'],
+        mail: ['foobar@example.com'],
+        displayName: ['Foo Bar'],
+        department: ['IT'],
+        samaccountname: ['foobar'],
+        memberOf: [
+          'CN=fakegroup,ou=groups,dc=example,dc=com',
+          'CN=fakedistro,OU=Distribution Groups,ou=groups,dc=example,dc=com'
+        ],
+        useraccountcontrol: ['512']
+      }
+    ]
+  end
+
+  let(:lockoutduration_search_result) do
+    # Assumes a 15 minute lockout duration
+    [
+      {
+        dn: ['dc=example,dc=com'],
+        lockoutduration: [(-1 * 15 * 60 * 10_000_000).to_s]
+      }
+    ]
+  end
+
+  let(:locked_search_result) do
+    [
+      {
+        dn: ['samaccountname=foobar,ou=users,dc=example,dc=com'],
+        mail: ['foobar@example.com'],
+        displayName: ['Foo Bar'],
+        department: ['IT'],
+        samaccountname: ['foobar'],
+        lockouttime: [
+          (((Time.now.to_i - 300) * 10_000_000) + 116_444_736_000_000_000).to_s
+        ],
         memberOf: [],
         useraccountcontrol: ['512']
       }
@@ -71,7 +145,7 @@ describe Cratus::User do
     ]
   end
 
-  context 'for a valid user' do
+  context 'with a valid user' do
     it 'finds a valid user' do
       allow(Cratus::LDAP)
         .to receive(:search).with(search_filter, search_options)
@@ -92,6 +166,94 @@ describe Cratus::User do
       expect(user.fullname).to eq('Foo Bar')
       expect(user.locked?).to be false
       expect(user.groups).to eq([])
+    end
+
+    it 'adds a user to a group' do
+      allow(Cratus::LDAP)
+        .to receive(:search).with(search_filter, search_options)
+        .and_return(search_result)
+
+      user = subject.new('foobar')
+      expect(user.add_to_group(fake_group)).to eq(true)
+    end
+
+    it 'removes a user to a group' do
+      allow(Cratus::LDAP)
+        .to receive(:search).with(search_filter, search_options)
+        .and_return(search_result)
+
+      user = subject.new('foobar')
+      expect(user.remove_from_group(fake_group)).to eq(true)
+    end
+
+    it 'determines if a user is locked' do
+      allow(Cratus::LDAP)
+        .to receive(:search).with('(objectClass=domain)', lockoutduration_search_options)
+        .and_return(lockoutduration_search_result)
+      allow(Cratus::LDAP)
+        .to receive(:search).with(search_filter, search_options)
+        .and_return(locked_search_result)
+
+      user = subject.new('foobar')
+      expect(user.locked?).to eq(true)
+    end
+
+    it 'determines if a user is enabled' do
+      allow(Cratus::LDAP)
+        .to receive(:search).with(search_filter, search_options)
+        .and_return(search_result)
+
+      user = subject.new('foobar')
+      expect(user.enabled?).to eq(true)
+      expect(user.disabled?).to eq(false)
+    end
+
+    it 'ignores distribution group memberships when told to' do
+      old = Cratus.config.include_distribution_groups
+      Cratus.config.include_distribution_groups = false
+
+      allow(Cratus::LDAP)
+        .to receive(:search).with(search_filter, search_options)
+        .and_return(search_result_with_groups)
+      allow(Cratus::Group).to receive(:new).with('fakegroup')
+        .and_return(fake_group)
+      allow(Cratus::Group).to receive(:new).with('fakedistro')
+        .and_return(fake_distro)
+
+      expect(subject.new('foobar').groups.size).to eq(1)
+      expect(subject.new('foobar').groups.first.name).to eq('fakegroup')
+
+      # put things back how we found them
+      Cratus.config.include_distribution_groups = old
+    end
+
+    it 'corrects for a missing lockouttime attribute' do
+      allow(Cratus::LDAP)
+        .to receive(:search).with(search_filter, search_options)
+        .and_return(search_result_with_groups)
+
+      user = subject.new('foobar')
+      expect(user.locked?).to eq(false)
+    end
+
+    context 'with an invalid group' do
+      it 'adding to a group raises an exception' do
+        allow(Cratus::LDAP)
+          .to receive(:search).with(search_filter, search_options)
+          .and_return(search_result)
+
+        user = subject.new('foobar')
+        expect { user.add_to_group('a') }.to raise_error('InvalidGroup')
+      end
+
+      it 'removing from a group raises an exception' do
+        allow(Cratus::LDAP)
+          .to receive(:search).with(search_filter, search_options)
+          .and_return(search_result)
+
+        user = subject.new('foobar')
+        expect { user.remove_from_group('a') }.to raise_error('InvalidGroup')
+      end
     end
   end
 
